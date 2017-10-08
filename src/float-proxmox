@@ -1,0 +1,77 @@
+#!/usr/bin/python
+
+import sys
+import time
+import consul
+import logging
+from app import Proxmox, Config, Consul
+from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
+
+class Consul():
+  def __init__(self, address="127.0.0.1", port="8500"):
+    self.port = port
+    self.address = address
+    self.c = self.connect()
+
+  def connect(self):
+    return consul.Consul(self.address, self.port)
+
+  def test_connection(self):
+    return self.c.agent.self()
+
+  def get_service(self, service):
+    return self.c.catalog.service(service)
+
+  def deregister_service(self,service_id):
+    return self.c.agent.service.deregister(service_id)
+
+  def register_service(self, service_name, vmid, port, address, tags):
+    # register(name, service_id=None, address=None, port=None, tags=None, check=None, token=None, script=None, interval=None, ttl=None, http=None, timeout=None, enable_tag_override=False)
+    self.c.agent.service.register(service_name, 
+                              service_id=vmid, 
+                              port=port, 
+                              address=address,
+                              tags=[tags])
+
+config = Config().read()
+logging.basicConfig(filename=config['settings']['log_file'],
+                      filemode='a',
+                      format='%(asctime)s [ %(levelname)s ] - %(message)s',
+                      datefmt='%m/%d/%Y  %H:%M:%S',
+                      level=config['settings']['log_level'])
+
+def register(service_name, data):
+  new = []
+  for x in data:
+    new.append(x['vmid'])
+  
+  old = []
+  for x in Consul().get_service(service_name)[1]:
+    old.append(x['ServiceID'])
+
+  delete = sorted(set(old) - set(new))
+  for x in delete:
+    Consul().deregister_service(x)
+    logging.info('Successfully connected and deregistered service with id "' + x + '" on http://' + config['consul']['address'] + ':' + config['consul']['port'])
+
+  for x in proxmox_lxc:
+    Consul().register_service(service_name,
+                              x['vmid'], 
+                              80, 
+                              x['network'], 
+                              x['hostname'])
+
+try:
+  Consul().test_connection()
+except (ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError) as e:
+  logging.info('Can not connect to consul on http://' + config['consul']['address'] + ':' + config['consul']['port'] + '. Exiting')
+  sys.exit(0)
+
+while True:
+  # Find running lxc containers in a proxmox cluster and register them to consul
+  proxmox_lxc = Proxmox().get('lxc')
+  register('proxmox_lxc', proxmox_lxc)
+  logging.info('Successfully connected and configured lxc containers on http://' + config['consul']['address'] + ':' + config['consul']['port'])
+
+  # Take a nap
+  time.sleep(10)

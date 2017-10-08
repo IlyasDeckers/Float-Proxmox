@@ -1,0 +1,17 @@
+{
+    "consul": {
+        "address": "127.0.0.1",
+        "port": "8500"
+    },
+    "proxmox": {
+        "auth_token": "",
+        "host": "hostname",
+        "password": "password",
+        "port": "8006",
+        "username": "username@pve"
+    },
+    "settings": {
+        "log_file": "/var/log/float/float.log",
+        "log_level": "INFO"
+    }
+}

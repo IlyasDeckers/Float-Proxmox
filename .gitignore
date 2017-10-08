@@ -1,0 +1,5 @@
+usr/local/bin/*
+entrypoint.sh
+src/build/*
+src/dist/*
+float-proxmox.spec
