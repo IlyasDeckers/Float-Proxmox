@@ -10,7 +10,7 @@ cd Float-Proxmox
 vi etc/float-proxmox/config.json
 ```
 example:
-```
+```json
 {
     "consul": {
         "address": "127.0.0.1",
