@@ -1,4 +1,3 @@
-usr/local/bin/*
 entrypoint.sh
 src/build/*
 src/dist/*
