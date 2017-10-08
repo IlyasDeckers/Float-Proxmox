@@ -1,4 +1,4 @@
-Connect to the proxmox API to detect lxc container and collect the required information about them
+Register proxmox LXC containers as a service in Consul. 
 
 # Configuration
 ## config.json
@@ -8,7 +8,9 @@ NOTE: Leave the auth_token empty this will be generated automatically.
 ```
 cd Float-Proxmox
 vi etc/float-proxmox/config.json
-
+```
+example:
+```
 {
     "consul": {
         "address": "127.0.0.1",
@@ -41,9 +43,12 @@ sudo cp etc/float-proxmox/config.json /etc/float-proxmox/
 
 ln -s usr/local/bin/float-proxmox /usr/local/bin/float-proxmox
 ```
-
+Create a System V init script to start and stop Float-Proxmox and reload the configuration.
 ```
 vi /etc/init.d/float-proxmox
+```
+Copy the script below:
+```
 
 #!/bin/sh
 
