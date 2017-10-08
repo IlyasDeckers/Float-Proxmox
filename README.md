@@ -48,8 +48,7 @@ Create a System V init script to start and stop Float-Proxmox and reload the con
 vi /etc/init.d/float-proxmox
 ```
 Copy the script below:
-```
-
+```shell
 #!/bin/sh
 
 ### BEGIN INIT INFO
